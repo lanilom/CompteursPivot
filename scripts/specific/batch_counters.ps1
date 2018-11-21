@@ -31,7 +31,7 @@ Function update_batch_counters {
 
 Function getReportHeader {
 
-    $header = "{0};{1};{2};{3};{4};{5};{6};{7};{8};{9};{10};{11};{12};{13};{14};{15};{16};{17};{18};{19};{20};{21};{22};{23};{24};{25};{26}" -f 
+    $header = "{0};{1};{2};{3};{4};{5};{6};{7};{8};{9};{10};{11};{12};{13};{14};{15};{16};{17};{18};{19};{20};{21};{22};{23};{24};{25};{26};{27}" -f 
             "FICHIER",
             "NBLIGN-TOTAL", 
             "MNTISU", 
@@ -58,7 +58,8 @@ Function getReportHeader {
             "NBLIGN-OPERATIONS", 
             "NBLIGN-OPTIONS_DE_RENTE", 
             "NBLIGN-PERSONNE_MORALE", 
-            "NBLIGN-PERSONNE_PHYSIQUE"
+            "NBLIGN-PERSONNE_PHYSIQUE",
+            "NBLIGN-TARIFS_CONTRAT"
 
     $header
 
@@ -82,7 +83,7 @@ Function print_batch_counters {
 
         # print data
 
-        $line = "{0};{1};{2};{3};{4};{5};{6};{7};{8};{9};{10};{11};{12};{13};{14};{15};{16};{17};{18};{19};{20};{21};{22};{23};{24};{25};{26}" -f 
+        $line = "{0};{1};{2};{3};{4};{5};{6};{7};{8};{9};{10};{11};{12};{13};{14};{15};{16};{17};{18};{19};{20};{21};{22};{23};{24};{25};{26};{27}" -f 
             $zipFile.Name, 
             $hash_batchCounters[ "NBLIGN" ], 
             $hash_batchCounters[ "MNTISU" ], 
@@ -109,7 +110,8 @@ Function print_batch_counters {
             $hash_batchCounters[ "OPERATIONS" ], 
             $hash_batchCounters[ "OPTIONS_DE_RENTE" ], 
             $hash_batchCounters[ "PERSONNE_MORALE" ], 
-            $hash_batchCounters[ "PERSONNE_PHYSIQUE" ] 
+            $hash_batchCounters[ "PERSONNE_PHYSIQUE" ],
+            $hash_batchCounters[ "TARIFS_CONTRAT" ], 
         
         $line >> "$outDir\report.csv"
 }

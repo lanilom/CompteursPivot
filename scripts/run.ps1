@@ -36,7 +36,9 @@
 # 
 #
 # ##########################################################################################################
-$processOPERATIONSOnly = $true
+$processOPERATIONSOnly = $false
+
+
 
 
 cls
@@ -71,12 +73,12 @@ $allreadyProcessedZipFiles = loadListOfAllreadyProcessedFiles "$outDir\report.cs
 
 
 # load transcodification table from CDPRDTNORA  to CDPRDT
-$hash_CDPRDTNORA2CDPRDT = loadHashTableFromCSVfile "$refDir\CDPRDTNORA2CDPRDT.csv" $COLSEP "CDPRDTNORA" "CDPRDT"
+# $hash_CDPRDTNORA2CDPRDT = loadHashTableFromCSVfile "$refDir\CDPRDTNORA2CDPRDT.csv" $COLSEP "CDPRDTNORA" "CDPRDT"
 
 
 
 # remove temporary files
-# if ( Test-Path -path $tempDir ) { Remove-Item -path "$tempDir\*" }
+if ( Test-Path -path $tempDir ) { Remove-Item -path "$tempDir\*" }
 
 #####
 
@@ -92,7 +94,7 @@ foreach ($zipFile in Get-Item -Path "$inDir\*.zip") {
 
         write-host $zipFile.Name
 
-#        unzip2 $zipFile.FullName $tempDir
+        unzip2 $zipFile.FullName $tempDir
 
 #####
     
@@ -142,7 +144,7 @@ foreach ($zipFile in Get-Item -Path "$inDir\*.zip") {
                         $NUMLOT = $operation.NUMLOT
 
                         # $hash_reference_PM is passed by reference
-                        loadReferencePM $APPLICATION $NUMLOT $hash_referencePM
+#                        loadReferencePM $APPLICATION $NUMLOT $hash_referencePM
 
                     }
 
@@ -150,13 +152,13 @@ foreach ($zipFile in Get-Item -Path "$inDir\*.zip") {
                     update_batch_counters $hash_batchCounters $operation
 
                     # update OPERATIONS counters
-#                    update_operations_counters $hash_operations_counters $operation
+                    update_operations_counters $hash_operations_counters $operation
 
 
                     # #############################################
                     # update OPERATIONS counters at the NMCPT level
                     # #############################################
-                    update_operations_counters2 $hash_operations_counters2 $hash_CDPRDTNORA2CDPRDT $hash_referencePM $operation
+#                    update_operations_counters2 $hash_operations_counters2 $hash_CDPRDTNORA2CDPRDT $hash_referencePM $operation
 
                 }
 
@@ -167,7 +169,7 @@ foreach ($zipFile in Get-Item -Path "$inDir\*.zip") {
 
     # add in hash_operations_counters2 accounts with reference PM and not in the OPERATIONS file
 
-    add_accounts_with_referencePM_and_not_in_OPERATIONS_file $hash_referencePM $hash_operations_counters2
+#    add_accounts_with_referencePM_and_not_in_OPERATIONS_file $hash_referencePM $hash_operations_counters2
 
     # ###########################################
     # print batch counters
@@ -184,19 +186,19 @@ foreach ($zipFile in Get-Item -Path "$inDir\*.zip") {
     # ###########################################
     # print operations counters2
     # ###########################################
-    print_operations_counters2 $hash_operations_counters2 
+#    print_operations_counters2 $hash_operations_counters2 
 
 
 
 
     # remove temporary files
-#    if ( Test-Path -path $tempDir ) {Remove-Item -path "$tempDir\*"}
+    if ( Test-Path -path $tempDir ) {Remove-Item -path "$tempDir\*"}
 ####
 
     # add counters to reportfile
 
     # move zip file into $arcDir
-#    Move-Item $zipFile.FullName $arcDir
+    Move-Item $zipFile.FullName $arcDir
 ####
 
     write-host
