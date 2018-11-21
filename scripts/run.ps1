@@ -4,7 +4,33 @@
 #
 # ##########################################################################################################
 #
+# OUTFILE
+# - NUMASSU_CONTROLE: 
+#    - NORA: [Code du produit (NORA)] + right([N° de compte],8)
 #
+# - NUMASSU_PIVOT
+# - €_MNTISU
+# - €_MNTSUP
+# - €_NBPENG
+#
+# - €_CONTROLE
+#   - NORA: [Valeur de rachat fin N-1 (ind.)]
+#
+# - €_MNTISU-€_CONTROLE : [€_MNTISU]-[€_CONTROLE]
+# - €_MNTISU-€_CONTROLE > 1 : if abs([€_MNTISU-€_CONTROLE]) > 1 then "VRAI" else "" endif
+# - UC_MNTISU
+# - UC_MNTSUP
+# - UC_NBPENG
+#
+# - UC_CONTROLE
+#   - NORA: [Valorisation de la garantie UC au 31/12/AA-1]
+#
+# - UC_MNTISU-UC_CONTROLE : [UC_MNTISU]-[UC_CONTROLE]
+# - UC_MNTISU-UC_CONTROLE > 1 : if abs([UC_MNTISU-UC_CONTROLE]) > 1 then "VRAI" else "" endif
+#
+# - AbsentDuPivot : IF [NUMASSU_PIVOT]="" THEN "VRAI" ELSE "" ENDIF
+#
+# - AbsentDuFichierDeControle : IF [NUMASSU_CONTROLE]="" THEN "VRAI" ELSE "" ENDIF
 # 
 # 
 # 
