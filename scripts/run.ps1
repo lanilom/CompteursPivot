@@ -49,7 +49,7 @@ cd $PSScriptRoot
 . .\common\loadHashTableFromCSVfile.ps1
 . .\specific\getFileTemplateNameFromFilename.ps1
 . .\specific\getApplicationFromFilename.ps1
-. .\specific\loadReferencePM.ps1
+#. .\specific\loadReferencePM.ps1
 . .\specific\loadListOfAllreadyProcessedFiles.ps1
 . .\specific\batch_counters.ps1
 . .\specific\operations_counters.ps1
