@@ -1,3 +1,25 @@
+Function IsAbsoluteGapGreaterThan1 {
+
+    param (
+        [double]$value1=0,
+        [double]$value2=0
+
+    )
+
+    $return = ""
+
+    [double]$gap = ($value1 - $value2)
+
+    if ( [math]::Abs( $gap ) -gt 1 ) {
+
+        $return = "VRAI"
+
+    } 
+
+    $return
+
+}
+
 Function loadReferencePM_LOIC_813 {
 
     param (
@@ -101,33 +123,106 @@ Function loadReferencePM_NORA {
 
     )
 
-    $MNTPM_TOTAL = 0
+    $TOTALPM_EURO = 0
+    $TOTALPM_UC = 0
 
     Import-Csv -Path $file.FullName -Delimiter ";" -Encoding Default  | % {
 
-        $APPLICATION="NORA"
-        $CDPRDT = $_."Code produit CNP"
-        $CDCLLCTVT = ($_."Code collectivité").substring(0, 5)
-        $CDCNTRT = $_."Code contrat collectif"
-#        $NMCPT = "{0}{1}" -f $_."Code du produit (NORA)", ($_."N° de compte").substring(3, 8)
-        $NMCPT = $_."N° de compte"
-        $MNTPM =  [double]($_."Valeur de rachat fin N-1 (ind.)".Replace(",","."))
+        # compute NUMASSU
 
-        $MNTPM_TOTAL += $MNTPM
+        $CDPRDT_NORA = $_."Code du produit (NORA)"
+        $NMCPT = $_."N° de compte".Substring(3,8)
+        $NUMASSU = "{0}{1}" -f $CDPRDT_NORA, $NMCPT
 
-        $key = "{0};{1};{2};{3};{4}" -f  $APPLICATION, $CDPRDT, $CDCLLCTVT, $CDCNTRT, $NMCPT
+        # get EURO and UC values
 
-        if ( $hash.ContainsKey( $key )  )  {
+        # EURO = [Valeur de rachat fin N-1 (ind.)]
+        $EURO_CONTROLE = [double]($_."Valeur de rachat fin N-1 (ind.)".Replace(",","."))
 
-            $hash[ $key ] += $MNTPM
+        # UC = [Valorisation de la garantie UC au 31/12/AA-1]
+        $UC_CONTROLE = [double]($_."Valorisation de la garantie UC au 31/12/AA-1".Replace(",","."))
 
-        } else {
 
-            $hash.Add( $key, $MNTPM)
-        }
+        # compute total PM
+        $TOTALPM_EURO += $EURO_CONTROLE
+        $TOTALPM_UC += $UC_CONTROLE
+
+
+        # search if NUMASSU was already inserted in the index
+
+
+        if ( $hash.ContainsKey( $NUMASSU ) ) { # update NUMASSU € and UC related values
+
+            if ( $EURO_CONTROLE -gt 0 ) {
+                $hash[$NUMASSU]["€_CONTROLE"] += $EURO_CONTROLE
+                $hash[$NUMASSU]["€_MNTISU-€_CONTROLE"] = (0 - $hash[$NUMASSU]["€_CONTROLE"])
+                $hash[$NUMASSU]["€_MNTISU-€_CONTROLE > 1"] = IsAbsoluteGapGreaterThan1 0 $hash[$NUMASSU]["€_CONTROLE"]
+            }
+
+            if ( $UC_CONTROLE -gt 0 ) {
+                $hash[$NUMASSU]["UC_CONTROLE"] += $UC_CONTROLE
+                $hash[$NUMASSU]["UC_MNTISU-UC_CONTROLE"] = (0 - $hash[$NUMASSU]["UC_CONTROLE"])
+                $hash[$NUMASSU]["UC_MNTISU-UC_CONTROLE > 1"] = IsAbsoluteGapGreaterThan1 0 $hash[$NUMASSU]["UC_CONTROLE"]
+            }
+
+        } else { # add a new NUMASSU
+
+            $NUMASSU_CONTROLE = $NUMASSU
+
+            # compute euro related values if euro > 0
+            if ( $EURO_CONTROLE -gt 0 ) {
+                $EURO_DIFFERENCE_MNTISU_CONTROLE = ( 0 - $EURO_CONTROLE )
+                $EURO_DIFFERENCE_MNTISU_CONTROLE_SUP1 = IsAbsoluteGapGreaterThan1 0 $EURO_CONTROLE
+            } else {
+                $EURO_DIFFERENCE_MNTISU_CONTROLE = 0
+                $EURO_DIFFERENCE_MNTISU_CONTROLE_SUP1 = ""
+            }
+        
+           
+            # compute UC related values id uc > 0
+            if ( $UC_CONTROLE -gt 0 ) {
+                $UC_DIFFERENCE_MNTISU_CONTROLE = ( 0 - $UC_CONTROLE )
+                $UC_DIFFERENCE_MNTISU_CONTROLE_SUP1 = IsAbsoluteGapGreaterThan1 0 $UC_CONTROLE
+            } else {
+                $UC_DIFFERENCE_MNTISU_CONTROLE = 0
+                $UC_DIFFERENCE_MNTISU_CONTROLE_SUP1 = ""
+            }
+        
+            # add key / value
+
+            $hash2 = @{}
+
+            $hash2.Add("NUMASSU", $NUMASSU)
+            $hash2.Add("NUMASSU_CONTROLE", $NUMASSU)
+            $hash2.Add("NUMASSU_PIVOT", "")
+            $hash2.Add("€_MNTISU", 0)
+            $hash2.Add("€_MNTSUP", 0)
+            $hash2.Add("€_NBPENG", 0)
+            $hash2.Add("€_CONTROLE", $EURO_CONTROLE)
+            $hash2.Add("€_MNTISU-€_CONTROLE", $EURO_DIFFERENCE_MNTISU_CONTROLE)
+            $hash2.Add("€_MNTISU-€_CONTROLE > 1", $EURO_DIFFERENCE_MNTISU_CONTROLE_SUP1)
+            $hash2.Add("UC_MNTISU", 0)
+            $hash2.Add("UC_MNTSUP", 0)
+            $hash2.Add("UC_NBPENG", 0)
+            $hash2.Add("UC_CONTROLE", $UC_CONTROLE)
+            $hash2.Add("UC_MNTISU-UC_CONTROLE", $UC_DIFFERENCE_MNTISU_CONTROLE)
+            $hash2.Add("UC_MNTISU-UC_CONTROLE > 1", $UC_DIFFERENCE_MNTISU_CONTROLE_SUP1)
+            $hash2.Add("AbsentDuPivot", "VRAI")
+            $hash2.Add("AbsentDuFichierDeControle", "")
+
+
+            $hash.Add( $NUMASSU, $hash2)
+
+
+        } 
+
+       
     }
 
-    Write-host "TOTAL PM $fileFullname : $MNTPM_TOTAL" 
+    "TOTAL PM €   : {0:N}" -f $TOTALPM_EURO | write-host  
+    "TOTAL PM UC  : {0:N}" -f $TOTALPM_UC | write-host
+    "TOTAL PM €+UC: {0:N}" -f ($TOTALPM_EURO + $TOTALPM_UC) | write-host
+ 
 }
 
 
@@ -196,15 +291,30 @@ Function loadReferencePM {
 # TEST
 # ##################################
 
-#[hashtable]$hash = @{}
+Function test_loadReferencePM {
 
 
-# test NORA lot 1
-#loadReferencePM "NORA" "1" $hash
 
-# test LOIC lot 3
-#loadReferencePM "LOIC" "3" $hash
+    if ( !(get-variable "refDir" -ErrorAction SilentlyContinue) ) {
+        
+        $refDir = "$PSScriptRoot\..\..\ref"
+    }
 
+
+    [hashtable]$hash = @{}
+
+
+    # test NORA lot 1
+    loadReferencePM "NORA" "1" $hash
+
+    # test LOIC lot 3
+#    loadReferencePM "LOIC" "3" $hash
+
+
+}
+
+
+test_loadReferencePM
 
 
 
