@@ -47,9 +47,9 @@ cd $PSScriptRoot
 
 . .\common\unzip.ps1
 . .\common\loadHashTableFromCSVfile.ps1
+. .\common\load_XMLCONFIG.ps1
 . .\specific\getFileTemplateNameFromFilename.ps1
 . .\specific\getApplicationFromFilename.ps1
-#. .\specific\loadReferencePM.ps1
 . .\specific\loadListOfAllreadyProcessedFiles.ps1
 . .\specific\batch_counters.ps1
 . .\specific\operations_counters.ps1
@@ -63,7 +63,33 @@ $outDir = "$moduleDir\out"
 $tempDir = "$moduleDir\temp"
 $refDir = "$moduleDir\ref"
 $arcDir = "$moduleDir\archives"
+$configDir = "$moduleDir\config"
+$logDir = "$moduleDir\log"
 
+
+
+# load config file
+$XMLCONFIG = load_XMLCONFIG $configDir $logDir
+
+
+$xmlconfig.SelectNodes('//config/fields/field') | % {
+
+    $msg = '{0,-5} {1,-3 } {2,-25} {3,-35}' -f $_.application, $_.produit, $_.code, $_.label 
+
+    $msg
+
+}
+
+$xmlconfig.SelectNodes("//config/fields/NORA_1_ALL/field") | % {
+
+    $msg = '{0,-5} {1,-3 } {2,-25} {3,-35}' -f $_.application, $_.produit, $_.code, $_.label 
+
+    $msg
+
+}
+
+
+exit
 
 $COLSEP = ";"
 

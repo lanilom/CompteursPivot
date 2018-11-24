@@ -1,0 +1,1 @@
+CompteursPivot: compteurs de lignes et de PM du oivot LOIC ou NORA
